@@ -445,7 +445,7 @@ function setBrightness(brightness, id) {
             exec(`powershell.exe (Get-WmiObject -Namespace root\\wmi -Class WmiMonitorBrightnessMethods).wmisetbrightness(0, ${brightness})`)
         }
     } catch (e) {
-        console.log("Couldn't update brightness!");
+        console.log("Couldn't update the brightness!"); //Log error
         console.log(e)
     }
 }
