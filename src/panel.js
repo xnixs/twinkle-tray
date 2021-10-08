@@ -8,7 +8,6 @@ window.ipc.send('request-localization')
 
 ReactDOM.render(<BrightnessPanel monitors={window.allMonitors} lastUpdate={window.lastUpdate} />, document.getElementById("root"));
 
-
 // Demo mode
 window.addEventListener("enableDemoMode", () => {
     window.allMonitors = [{
@@ -40,3 +39,12 @@ window.addEventListener("enableDemoMode", () => {
 window.document.getElementById("root").addEventListener('transitionend', function () {
     window.panelAnimationDone()
 });
+
+window.document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        window.thisWindow.blur()
+    }
+})
+
+allMonitors = {}
+window.ipc.send('full-refresh', true)

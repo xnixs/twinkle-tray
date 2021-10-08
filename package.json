@@ -1,18 +1,19 @@
 {
   "name": "twinkle-tray",
-  "version": "1.11.4",
+  "version": "1.13.9",
   "description": "Manage the brightness of monitors from your system tray",
   "main": "src/electron.js",
   "scripts": {
-    "parcel": "parcel *.html --port 3000 --out-dir cache",
-    "parcel-build": "del /q build && parcel build *.html --out-dir build --public-url ./ --experimental-scope-hoisting --no-source-maps",
+    "parcel": "parcel src/html/*.html --port 3000 --out-dir cache",
+    "parcel-build": "del /q build && parcel build src/html/*.html --out-dir build --public-url ./ --experimental-scope-hoisting --no-source-maps",
+    "dev": "wait-on http://localhost:3000/index.html && electron . ",
     "electron-build": "electron-builder",
     "postinstall": "electron-builder install-app-deps",
     "appx": "npm run parcel-build && electron-builder -w appx -c.extraMetadata.name=twinkle-tray-appx -c.win.artifactName=\"${productName} v${version}-store.${ext}\"",
     "appx-signed": "npm run parcel-build && electron-builder -w appx -c.win.certificateFile=cert.pfx -c.extraMetadata.name=twinkle-tray-appx -c.win.artifactName=\"${productName} v${version}-signed.${ext}\"",
     "rebuild-ddcci-dev": "electron-rebuild -f -w @hensm/ddcci",
     "build": "npm run parcel-build && npm run electron-build",
-    "start": "wait-on http://localhost:3000/index.html && electron . "
+    "start": "concurrently \"npm run parcel\" \"npm run dev\""
   },
   "keywords": [
     "electron",
@@ -24,20 +25,23 @@
   "author": "Xander Frangos",
   "license": "MIT",
   "dependencies": {
-    "@hensm/ddcci": "0.0.4",
-    "color": "^3.1.2",
+    "@hensm/ddcci": "^0.1.0",
+    "color": "^3.1.3",
+    "electron-acrylic-window": "file:src/modules/electron-acrylic-window",
     "electron-winstore-auto-launch": "^2.0.3",
-    "global-mouse-events": "^1.0.3",
+    "global-mouse-events": "^1.0.7",
     "markdown-to-jsx": "^6.11.4",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "regedit": "^3.0.3",
+    "setwindowpos-binding": "file:src/modules/setwindowpos",
     "universal-analytics": "^0.4.23",
-    "wmi-client": "^0.5.0",
-    "electron-acrylic-window": "^0.3.0"
+    "win32-displayconfig": "^0.1.0",
+    "wmi-client": "^0.5.0"
   },
   "build": {
     "productName": "Twinkle Tray",
     "appId": "com.xanderfrangos.twinkle-tray",
+    "compression": "maximum",
     "directories": {
       "buildResources": "resources"
     },
@@ -48,13 +52,30 @@
       "src/settings-preload.js",
       "src/intro-preload.js",
       "src/localization/*",
+      "src/Utils.js",
+      "src/Monitors.js",
       "src/assets/tray-icons/dark/*",
       "src/assets/tray-icons/light/*",
       "build/**/*",
       "!node_modules/wmi-client/bin",
       "!node_modules/@hensm/ddcci/build",
       "node_modules/@hensm/ddcci/build/Release/ddcci.node",
-      "!node_modules/node-addon-api/doc"
+      "!node_modules/node-addon-api/doc",
+      "!node_modules/win32-displayconfig/node_modules*",
+      "!node_modules/global-mouse-events/node_modules",
+      "!node_modules/electron-acrylic-window/node_modules",
+      "!node_modules/setwindowpos-binding/node_modules",
+      "!node_modules/**/node-gyp/*",
+      "!node_modules/**/*.ipdb",
+      "!node_modules/**/*.iobj",
+      "!node_modules/**/*.h",
+      "!node_modules/**/*.md",
+      "!node_modules/**/*.c",
+      "!node_modules/**/*.map",
+      "!node_modules/**/*.log",
+      "!node_modules/**/*.tlog",
+      "!node_modules/**/*.vcxproj",
+      "!node_modules/**/*.filters"
     ],
     "extraResources": [
       "node_modules\\regedit\\vbs\\*",
@@ -77,22 +98,28 @@
       "publisher": "CN=B8E9A58B-32A7-4C6C-A474-D4BE2A3CEAD8",
       "showNameOnTiles": false,
       "backgroundColor": "#6b479c"
+    },
+    "nsis": {
+      "deleteAppDataOnUninstall": true,
+      "include": "resources/nsis/installer.nsh",
+      "warningsAsErrors": false
     }
   },
   "devDependencies": {
-    "@babel/core": "^7.10.5",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/preset-react": "^7.10.4",
-    "concurrently": "^5.2.0",
-    "cross-env": "^7.0.2",
-    "electron": "^8.4.0",
-    "electron-builder": "^22.7.0",
+    "@babel/core": "^7.13.8",
+    "@babel/plugin-proposal-class-properties": "^7.12.13",
+    "@babel/preset-env": "^7.13.8",
+    "@babel/preset-react": "^7.12.13",
+    "concurrently": "^5.3.0",
+    "cross-env": "^7.0.3",
+    "electron": "^12.0.2",
+    "electron-builder": "^22.10.5",
     "electron-is-dev": "^1.2.0",
-    "parcel-bundler": "^1.12.4",
-    "react": "^16.13.1",
+    "parcel-bundler": "^1.12.5",
+    "react": "^16.14.0",
     "react-beautiful-dnd": "^13.0.0",
     "react-dom": "16.13.1",
-    "sass": "^1.26.10",
-    "wait-on": "4.0.2"
+    "sass": "^1.32.7",
+    "wait-on": "^5.3.0"
   }
 }

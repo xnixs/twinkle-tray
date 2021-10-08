@@ -17,16 +17,35 @@ export default class BrightnessPanel extends PureComponent {
     if (!this.state.monitors || this.numMonitors == 0) {
       return (<div className="no-displays-message">{T.t("GENERIC_NO_COMPATIBLE_DISPLAYS")}</div>)
     } else {
-      const sorted = Object.values(this.state.monitors).slice(0).sort(monitorSort)
-      return sorted.map((monitor, index) => {
-        if (monitor.type == "none") {
-          return (<div key={monitor.key}></div>)
-        } else {
-          return (
-            <Slider name={this.getMonitorName(monitor, this.state.names)} id={monitor.id} level={monitor.brightness} min={0} max={100} num={monitor.num} monitortype={monitor.type} hwid={monitor.key} key={monitor.key} onChange={this.handleChange} />
-          )
+
+      if(this.state.linkedLevelsActive) {
+        // Combine all monitors
+        for(const key in this.state.monitors) {
+          const monitor = this.state.monitors[key]
+          if(monitor.type == "wmi" || monitor.type == "ddcci") {
+            return (
+              <Slider name={T.t("GENERIC_ALL_DISPLAYS")} id={monitor.id} level={monitor.brightness} min={0} max={100} num={monitor.num} monitortype={monitor.type} hwid={monitor.key} key={monitor.key} onChange={this.handleChange} />
+            )
+          }
+          return (<div className="no-displays-message">{T.t("GENERIC_NO_COMPATIBLE_DISPLAYS")}</div>)
         }
-      })
+      } else {
+        // Show all valid monitors individually
+        const sorted = Object.values(this.state.monitors).slice(0).sort(monitorSort)
+        return sorted.map((monitor, index) => {
+          if (monitor.type == "none") {
+            return (<div key={monitor.key}></div>)
+          } else {
+            if(monitor.type == "wmi" || monitor.type == "ddcci") {
+              return (
+                <Slider name={this.getMonitorName(monitor, this.state.names)} id={monitor.id} level={monitor.brightness} min={0} max={100} num={monitor.num} monitortype={monitor.type} hwid={monitor.key} key={monitor.key} onChange={this.handleChange} />
+              )
+            }
+          }
+        })
+      }
+
+
     }
   }
 
@@ -35,6 +54,14 @@ export default class BrightnessPanel extends PureComponent {
     if (this.numMonitors > 1) {
       return (
         <div title={T.t("PANEL_BUTTON_LINK_LEVELS")} data-active={this.state.linkedLevelsActive} onClick={this.toggleLinkedLevels} className="link">&#xE71B;</div>
+      )
+    }
+  }
+
+  getSleepIcon = () => {
+    if(window.settings.sleepAction !== "none") {
+      return (
+        <div title={T.t("PANEL_BUTTON_TURN_OFF_DISPLAYS")} className="off" onClick={window.turnOffDisplays}>&#xF71D;</div>
       )
     }
   }
@@ -52,8 +79,8 @@ export default class BrightnessPanel extends PureComponent {
       return (<div className="updateBar">
         <div className="left">{T.t("PANEL_UPDATE_AVAILABLE")} ({this.state.update.version})</div><div className="right"><a onClick={window.installUpdate}>{T.t("GENERIC_INSTALL")}</a><a className="icon" title={T.t("GENERIC_DISMISS")} onClick={window.dismissUpdate}>&#xEF2C;</a></div>
       </div>)
-    } else if(this.state.update && this.state.update.downloading) {
-    return (<div className="updateBar"><div className="left progress"><div className="progress-bar"><div style={ { width: `${this.state.updateProgress}%`} }></div></div></div><div className="right">{this.state.updateProgress}%</div></div>)
+    } else if (this.state.update && this.state.update.downloading) {
+      return (<div className="updateBar"><div className="left progress"><div className="progress-bar"><div style={{ width: `${this.state.updateProgress}%` }}></div></div></div><div className="right">{this.state.updateProgress}%</div></div>)
     }
   }
 
@@ -73,9 +100,6 @@ export default class BrightnessPanel extends PureComponent {
   handleChange = (level, slider) => {
     const monitors = Object.assign(this.state.monitors, {})
     const sliderMonitor = monitors[slider.props.hwid]
-
-    console.log(sliderMonitor)
-    console.log(level)
 
     if (this.numMonitors && this.state.linkedLevelsActive) {
       // Update all monitors (linked)
@@ -105,6 +129,8 @@ export default class BrightnessPanel extends PureComponent {
       })
     }
 
+    window.pauseMonitorUpdates()
+
     this.forceUpdate()
   }
 
@@ -129,7 +155,7 @@ export default class BrightnessPanel extends PureComponent {
     })
 
     // Delay initial adjustments
-    if(!this.init) setTimeout( () => { this.init = true }, 333)
+    if (!this.init) setTimeout(() => { this.init = true }, 333)
   }
 
 
@@ -149,7 +175,7 @@ export default class BrightnessPanel extends PureComponent {
 
       this.levelsChanged = true
 
-      if(inMonitors) {
+      if (inMonitors) {
         return inMonitors
       } else {
         this.setState({
@@ -165,7 +191,8 @@ export default class BrightnessPanel extends PureComponent {
   // Update settings
   recievedSettings = (e) => {
     const settings = e.detail
-    const linkedLevelsActive = (settings.linkedLevelsActive || false)
+    const linkedLevelsActive = (settings.linkedLevelsActive ?? false)
+    const sleepAction = (settings.sleepAction ?? "none")
     const updateInterval = (settings.updateInterval || 500) * 1
     const remaps = (settings.remaps || {})
     const names = (settings.names || {})
@@ -174,7 +201,8 @@ export default class BrightnessPanel extends PureComponent {
       linkedLevelsActive,
       remaps,
       names,
-      updateInterval
+      updateInterval,
+      sleepAction
     }, () => {
       this.resetBrightnessInterval()
       this.updateMinMax()
@@ -269,11 +297,11 @@ export default class BrightnessPanel extends PureComponent {
 
     if (window.isAppX === false) {
       window.addEventListener("updateProgress", (e) => {
-          this.setState({
-              updateProgress: e.detail.progress
-          })
+        this.setState({
+          updateProgress: e.detail.progress
+        })
       })
-  }
+    }
 
     // Update brightness every interval, if changed
     this.resetBrightnessInterval()
@@ -299,7 +327,7 @@ export default class BrightnessPanel extends PureComponent {
             <div className="title">{T.t("PANEL_TITLE")}</div>
             <div className="icons">
               {this.getLinkIcon()}
-              <div title={T.t("PANEL_BUTTON_TURN_OFF_DISPLAYS")} className="off" onClick={window.turnOffDisplays}>&#xF71D;</div>
+              {this.getSleepIcon()}
               <div title={T.t("GENERIC_SETTINGS")} className="settings" onClick={window.openSettings}>&#xE713;</div>
             </div>
           </div>

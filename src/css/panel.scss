@@ -1,4 +1,3 @@
-
 //
 // Defaults
 //
@@ -21,44 +20,81 @@ body {
 
 #root {
 
-    & > .window-base {
+    &>.window-base {
         background: var(--tray-background);
-        border: 1px solid var(--tray-border);
-        border-width: 1px 0px 0px 1px;
+        box-shadow: 0.5px 0.5px 0 0.5px var(--tray-border) inset;
         color: var(--tray-text);
-        font-family: 'Segoe UI';
+        font-family: 'Segoe UI Variable Text', 'Segoe UI';
         width: 100vw;
         box-sizing: border-box;
         padding: 15px 15px 0 15px;
         position: absolute;
-        bottom: 0;
+        top: 0;
         left: 0;
-        opacity: 0;
-        transition: opacity 0.2s, transform 0.5s cubic-bezier(0.075, 0.82, 0.165, 1), background-color 0.99s, border-color 0.2s, color 0.2s;
-        transform: translateY(100%);
+        transition: opacity 0s, transform 0s cubic-bezier(0.075, 0.82, 0.165, 1), background-color 0.5s, border-color 0.2s, color 0.2s;
+        transform: translate(0px, 0px);
+        opacity: 1;
         pointer-events: none;
     }
 
-    &[data-visible="true"] > .window-base {
-        transform: translateY(0%) !important;
-        opacity: 1;
+    &[data-visible="true"]>.window-base {
         pointer-events: all;
     }
 
-    &[data-position="TOP"] > .window-base {
-        border-width: 0 0 1px 1px;
-        transform: translateY(-100%);
+    &[data-position="TOP"]>.window-base {
+        box-shadow: 0.5px -0.5px 0 0.5px var(--tray-border) inset;
+        top: auto;
+        bottom: 0;
     }
 
-    &[data-position="LEFT"] > .window-base {
-        border-width: 1px 1px 0 0;
-        transform: translateX(-100%);
+    &[data-position="LEFT"]>.window-base {
+        box-shadow: -0.5px 0.5px 0 0.5px var(--tray-border) inset;
     }
 
-    &[data-position="RIGHT"] > .window-base {
-        transform: translateX(100%);
-    }
+    &[data-position="RIGHT"]>.window-base {}
 
+}
+
+
+
+@media (prefers-reduced-motion: reduce) {
+    #root>.window-base {
+        transition: none !important;
+    }
+}
+
+
+body[data-acrylic="false"],
+body[data-transparent="false"],
+body[data-use-native-animation="false"] {
+    #root {
+        &>.window-base {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(120px);
+        }
+
+        &[data-visible="true"]>.window-base {
+            transition: opacity 0.2s, transform 0.5s cubic-bezier(0.075, 0.82, 0.165, 1), background-color 0.85s, border-color 0.2s, color 0.2s;
+            transform: translateY(0%) !important;
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        &[data-position="TOP"]>.window-base {
+            border-width: 0 0 1px 1px;
+            transform: translateY(-120px);
+        }
+
+        &[data-position="LEFT"]>.window-base {
+            border-width: 1px 1px 0 0;
+            transform: translateX(-120px);
+        }
+
+        &[data-position="RIGHT"]>.window-base {
+            transform: translateX(120px);
+        }
+    }
 }
 
 
@@ -86,9 +122,11 @@ body {
         div {
             cursor: pointer;
             opacity: 0.7;
+
             &:hover {
                 opacity: 1;
             }
+
             &[data-active="true"] {
                 color: var(--system-accent-medium);
                 opacity: 1;
@@ -120,28 +158,34 @@ body {
     .left {
         font-size: 13px;
         opacity: 0.8;
+
         &.progress {
             padding-right: 15px;
             width: 100%;
         }
     }
+
     .right {
         display: flex;
         font-size: 13px;
         align-items: center;
+
         a {
             cursor: pointer;
             padding: 1px 5px;
             margin: 0px 0;
             font-weight: 500;
             opacity: 1;
+
             &:hover {
                 opacity: 0.8;
             }
-            & + a {
+
+            &+a {
                 margin-left: 6px;
             }
         }
+
         .icon {
             margin-bottom: -1px;
         }
@@ -154,7 +198,8 @@ body {
     height: 5px;
     max-width: 320px;
     background: rgba(white, 0.2);
-    & > div {
+
+    &>div {
         position: absolute;
         top: 0;
         left: 0;
@@ -171,6 +216,7 @@ body {
 .monitor-item {
     margin: 0 !important;
     height: 73px;
+
     .input--range {
         padding-bottom: 15px;
     }
@@ -185,7 +231,7 @@ $overlayBarWidthOff: $overlayBarWidth * -0.5;
             height: $overlayBarWidth;
             margin-top: $overlayBarWidthOff;
         }
-        
+
         .input--range .range::-webkit-slider-thumb {
             height: $overlayBarWidth;
             width: $overlayBarWidth;
@@ -193,20 +239,20 @@ $overlayBarWidthOff: $overlayBarWidth * -0.5;
             margin-top: 0px;
             background: white;
         }
-        
+
         .input--range .range::-webkit-slider-runnable-track {
             height: $overlayBarWidth;
             background: #6a6a6a;
         }
-        
+
         .titlebar {
             display: none;
         }
-        
+
         .monitor-item .input--range {
             padding-bottom: 15px;
         }
-        
+
         .monitor-item {
             height: 140px;
             height: 136px;
@@ -215,24 +261,25 @@ $overlayBarWidthOff: $overlayBarWidth * -0.5;
             overflow: visible;
             position: relative;
         }
-        
-        & > .window-base {
+
+        &>.window-base {
             border: none;
-            border: 0px solid var(--tray-border);
+            border: 0px solid var(--tray-border) !important;
             width: calc(100% - 60px);
             width: auto;
             padding: 2px 13px;
             transition: none !important;
             display: flex;
-            background: rgba(19, 19, 19, 0.95);
+            background: rgba(19, 19, 19, 0.95) !important;
+            box-shadow: none !important;
         }
-        
+
         .monitor-item .name-row .icon {
             display: none;
         }
 
         .input--range {
-            width:66px;
+            width: 66px;
             height: $overlayBarWidth;
             overflow: visible;
             position: relative;
@@ -249,7 +296,7 @@ $overlayBarWidthOff: $overlayBarWidth * -0.5;
             top: 53px;
             left: -33.5px;
         }
-        
+
         .input--range .val {
             font-size: 13px;
             width: 40px;
@@ -266,9 +313,9 @@ $overlayBarWidthOff: $overlayBarWidth * -0.5;
             white-space: nowrap;
 
         }
-        
+
         .monitor-item .name-row .title {
-            display:none;
+            display: none;
             position: absolute;
             top: 108px;
             left: 8px;
@@ -279,9 +326,37 @@ $overlayBarWidthOff: $overlayBarWidth * -0.5;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
         .updateBar {
             display: none;
+        }
+    }
+}
+
+// Sun Valley tweaks
+#root[data-fluent-icons="true"] {
+
+    .titlebar .icons, .icon {
+        font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+    }
+
+    &[data-mode="normal"] {
+        .monitor-item .name-row {
+            margin-bottom: 2px;
+            .icon {
+                margin-bottom: -2px;
+                margin-top: -1px;
+            }
+        }
+        .titlebar .title {
+            font-family: "Segoe UI Variable Small";
+            font-weight: 300;
+            font-size: 13.5px;
+        }
+        .monitor-item .name-row .title {
+            font-family: "Segoe UI Variable Small";
+            font-weight: 300;
+            font-size: 14.5px;
         }
     }
 }
