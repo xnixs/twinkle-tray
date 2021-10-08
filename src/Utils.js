@@ -57,6 +57,7 @@ module.exports = {
         }
 
         if (failed) {
+            console.log("Missing required arguements")
             console.log(`
 Supported args:
 
