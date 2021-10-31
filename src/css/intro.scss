@@ -58,6 +58,9 @@ img {
     font-size: 18px;
     font-weight: 700;
     margin: $margin auto 0;
+    user-select: none;
+    overflow: visible;
+    text-align: center;
 }
 
 p {
@@ -65,6 +68,9 @@ p {
     margin: $margin auto 0;
     font-size: 14px;
     line-height: 20px;
+    user-select: none;
+    overflow: visible;
+    text-align: center;
 }
 
 video {
